@@ -245,7 +245,7 @@ namespace BabelVMRestore.Core
                         }
                         if (string.IsNullOrEmpty(fieldName))
                         {
-                            ConsoleLogger.Error("[!] Could not find Dynamic Method Field Name! Trying with \uE006 !", info.Method.RVA, info.Method.MDToken.ToInt32());
+                            ConsoleLogger.Error("[!] Could not find Dynamic Method Field Name! Trying with \uE006 !");
                             fieldName = "\uE006";
                         }
                         gotFieldName = true;
