@@ -215,6 +215,8 @@ namespace BabelVMRestore.Core
         private int InvokeVMCallers(List<EncryptedInfo> InvokeCallerInfo)
         {
             int changes = 0;
+            bool gotFieldName = false;
+            string fieldName = "";
 
             Assembly assembly = Assembly.LoadFile(Settings.FileName);
             MethodBase mb = assembly.ManifestModule.ResolveMethod(_invokerMtd.MDToken.ToInt32());
@@ -230,7 +232,26 @@ namespace BabelVMRestore.Core
                     object dr = mb.Invoke(a, new object[] { (info.VMType == EncType.Int ? (object)info.Key : (object)info.KeyString) });
                     Type drType = dr.GetType();
 
-                    info.ResolvedDynamicMethod = ReflectionHelper.GetInstanceField(drType, dr, "\uE000") as System.Reflection.Emit.DynamicMethod;
+                    if (!gotFieldName)
+                    {
+                        foreach (FieldInfo fi in drType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                        {
+                            if (fi.FieldType.FullName == "System.Reflection.Emit.DynamicMethod")
+                            {
+                                fieldName = fi.Name;
+                                
+                                ConsoleLogger.Info("[!] Found Dynamic Method Field: MDToken: 0x{0:X}", fi.MetadataToken);
+                            }
+                        }
+                        if (string.IsNullOrEmpty(fieldName))
+                        {
+                            ConsoleLogger.Error("[!] Could not find Dynamic Method Field Name! Trying with \uE006 !", info.Method.RVA, info.Method.MDToken.ToInt32());
+                            fieldName = "\uE006";
+                        }
+                        gotFieldName = true;
+                    }
+
+                    info.ResolvedDynamicMethod = ReflectionHelper.GetInstanceField(drType, dr, fieldName) as System.Reflection.Emit.DynamicMethod;
 
                     SuperDynamicReader mbr = new SuperDynamicReader(_module, info.ResolvedDynamicMethod);
                     mbr.Read();
