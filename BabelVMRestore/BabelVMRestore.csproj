@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="dnlib">
-      <HintPath>..\..\BabelDeobfuscator\bin\Debug\dnlib.dll</HintPath>
+      <HintPath>..\Dependencies\dnlib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
